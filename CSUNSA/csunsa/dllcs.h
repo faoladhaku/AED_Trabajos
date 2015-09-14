@@ -4,6 +4,7 @@
 #include <cstring>
 #include <fstream>
 //se creara una doble lista enlazada para manipular las tablas de registros
+
 template<class T>
 class DLLcs
 {
@@ -114,22 +115,19 @@ T* DLLcs<T>::last()
 template <class T>
 T* DLLcs<T>::findkey(char* busqueda,T* Records)
 {
-
   nodo<T>* encuentra = p_head;
-
 
   while(encuentra)
     {
       if(!strcmp((encuentra->dato).key,busqueda))
         {
-
           this->p_current = encuentra;
           return &(this->p_current->dato);
         }
 
       encuentra= encuentra->next;
     }
-    cout << "paso" << endl;
+    //cout << "paso" << endl;
 
     return 0;
 }

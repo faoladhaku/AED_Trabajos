@@ -15,7 +15,7 @@ CXX           = g++
 DEFINES       = -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB
 CFLAGS        = -pipe -g -Wall -W -D_REENTRANT -fPIC $(DEFINES)
 CXXFLAGS      = -pipe -g -Wall -W -D_REENTRANT -fPIC $(DEFINES)
-INCPATH       = -I../csunsa -I. -I/opt/Qt/5.5/gcc_64/include -I/opt/Qt/5.5/gcc_64/include/QtWidgets -I/opt/Qt/5.5/gcc_64/include/QtGui -I/opt/Qt/5.5/gcc_64/include/QtCore -I. -I/opt/Qt/5.5/gcc_64/mkspecs/linux-g++
+INCPATH       = -I../csunsa -I. -I/opt/Qt/5.5/gcc_64/include -I/opt/Qt/5.5/gcc_64/include/QtWidgets -I/opt/Qt/5.5/gcc_64/include/QtGui -I/opt/Qt/5.5/gcc_64/include/QtCore -I. -I. -I/opt/Qt/5.5/gcc_64/mkspecs/linux-g++
 QMAKE         = /opt/Qt/5.5/gcc_64/bin/qmake
 DEL_FILE      = rm -f
 CHK_DIR_EXISTS= test -d
@@ -52,12 +52,14 @@ SOURCES       = ../csunsa/main.cpp \
 		../csunsa/mainwindow.cpp \
 		../csunsa/table.cpp \
 		../csunsa/dllcs.cpp \
-		../csunsa/nodo.cpp moc_mainwindow.cpp
+		../csunsa/nodo.cpp \
+		../csunsa/record.cpp moc_mainwindow.cpp
 OBJECTS       = main.o \
 		mainwindow.o \
 		table.o \
 		dllcs.o \
 		nodo.o \
+		record.o \
 		moc_mainwindow.o
 DIST          = /opt/Qt/5.5/gcc_64/mkspecs/features/spec_pre.prf \
 		/opt/Qt/5.5/gcc_64/mkspecs/common/unix.conf \
@@ -192,11 +194,13 @@ DIST          = /opt/Qt/5.5/gcc_64/mkspecs/features/spec_pre.prf \
 		../csunsa/csunsa.pro ../csunsa/mainwindow.h \
 		../csunsa/table.h \
 		../csunsa/dllcs.h \
-		../csunsa/nodo.h ../csunsa/main.cpp \
+		../csunsa/nodo.h \
+		../csunsa/record.h ../csunsa/main.cpp \
 		../csunsa/mainwindow.cpp \
 		../csunsa/table.cpp \
 		../csunsa/dllcs.cpp \
-		../csunsa/nodo.cpp
+		../csunsa/nodo.cpp \
+		../csunsa/record.cpp
 QMAKE_TARGET  = csunsa
 DESTDIR       = #avoid trailing-slash linebreak
 TARGET        = csunsa
@@ -224,7 +228,7 @@ first: all
 
 ####### Build rules
 
-$(TARGET):  $(OBJECTS)  
+$(TARGET): ui_mainwindow.h $(OBJECTS)  
 	$(LINK) $(LFLAGS) -o $(TARGET) $(OBJECTS) $(OBJCOMP) $(LIBS)
 
 Makefile: ../csunsa/csunsa.pro /opt/Qt/5.5/gcc_64/mkspecs/linux-g++/qmake.conf /opt/Qt/5.5/gcc_64/mkspecs/features/spec_pre.prf \
@@ -510,8 +514,9 @@ dist: distdir FORCE
 distdir: FORCE
 	@test -d $(DISTDIR) || mkdir -p $(DISTDIR)
 	$(COPY_FILE) --parents $(DIST) $(DISTDIR)/
-	$(COPY_FILE) --parents ../csunsa/mainwindow.h ../csunsa/table.h ../csunsa/dllcs.h ../csunsa/nodo.h $(DISTDIR)/
-	$(COPY_FILE) --parents ../csunsa/main.cpp ../csunsa/mainwindow.cpp ../csunsa/table.cpp ../csunsa/dllcs.cpp ../csunsa/nodo.cpp $(DISTDIR)/
+	$(COPY_FILE) --parents ../csunsa/mainwindow.h ../csunsa/table.h ../csunsa/dllcs.h ../csunsa/nodo.h ../csunsa/record.h $(DISTDIR)/
+	$(COPY_FILE) --parents ../csunsa/main.cpp ../csunsa/mainwindow.cpp ../csunsa/table.cpp ../csunsa/dllcs.cpp ../csunsa/nodo.cpp ../csunsa/record.cpp $(DISTDIR)/
+	$(COPY_FILE) --parents ../csunsa/mainwindow.ui $(DISTDIR)/
 
 
 clean: compiler_clean 
@@ -642,20 +647,27 @@ moc_mainwindow.cpp: /opt/Qt/5.5/gcc_64/include/QtWidgets/QMainWindow \
 		/opt/Qt/5.5/gcc_64/include/QtGui/qtouchdevice.h \
 		/opt/Qt/5.5/gcc_64/include/QtWidgets/qtabwidget.h \
 		/opt/Qt/5.5/gcc_64/include/QtGui/qicon.h \
+		../csunsa/table.h \
+		../csunsa/dllcs.h \
+		../csunsa/nodo.h \
 		../csunsa/mainwindow.h
 	/opt/Qt/5.5/gcc_64/bin/moc $(DEFINES) -I/opt/Qt/5.5/gcc_64/mkspecs/linux-g++ -I/home/uddua/WorkspaceQT/CSUNSA/csunsa -I/opt/Qt/5.5/gcc_64/include -I/opt/Qt/5.5/gcc_64/include/QtWidgets -I/opt/Qt/5.5/gcc_64/include/QtGui -I/opt/Qt/5.5/gcc_64/include/QtCore -I. ../csunsa/mainwindow.h -o moc_mainwindow.cpp
 
 compiler_moc_source_make_all:
 compiler_moc_source_clean:
-compiler_uic_make_all:
+compiler_uic_make_all: ui_mainwindow.h
 compiler_uic_clean:
+	-$(DEL_FILE) ui_mainwindow.h
+ui_mainwindow.h: ../csunsa/mainwindow.ui
+	/opt/Qt/5.5/gcc_64/bin/uic ../csunsa/mainwindow.ui -o ui_mainwindow.h
+
 compiler_yacc_decl_make_all:
 compiler_yacc_decl_clean:
 compiler_yacc_impl_make_all:
 compiler_yacc_impl_clean:
 compiler_lex_make_all:
 compiler_lex_clean:
-compiler_clean: compiler_moc_header_clean 
+compiler_clean: compiler_moc_header_clean compiler_uic_clean 
 
 ####### Compile
 
@@ -765,6 +777,9 @@ main.o: ../csunsa/main.cpp ../csunsa/mainwindow.h \
 		/opt/Qt/5.5/gcc_64/include/QtGui/qtouchdevice.h \
 		/opt/Qt/5.5/gcc_64/include/QtWidgets/qtabwidget.h \
 		/opt/Qt/5.5/gcc_64/include/QtGui/qicon.h \
+		../csunsa/table.h \
+		../csunsa/dllcs.h \
+		../csunsa/nodo.h \
 		/opt/Qt/5.5/gcc_64/include/QtWidgets/QApplication \
 		/opt/Qt/5.5/gcc_64/include/QtWidgets/qapplication.h \
 		/opt/Qt/5.5/gcc_64/include/QtCore/qcoreapplication.h \
@@ -879,20 +894,72 @@ mainwindow.o: ../csunsa/mainwindow.cpp ../csunsa/mainwindow.h \
 		/opt/Qt/5.5/gcc_64/include/QtGui/qvector2d.h \
 		/opt/Qt/5.5/gcc_64/include/QtGui/qtouchdevice.h \
 		/opt/Qt/5.5/gcc_64/include/QtWidgets/qtabwidget.h \
-		/opt/Qt/5.5/gcc_64/include/QtGui/qicon.h
+		/opt/Qt/5.5/gcc_64/include/QtGui/qicon.h \
+		../csunsa/table.h \
+		../csunsa/dllcs.h \
+		../csunsa/nodo.h \
+		ui_mainwindow.h \
+		/opt/Qt/5.5/gcc_64/include/QtCore/QVariant \
+		/opt/Qt/5.5/gcc_64/include/QtWidgets/QAction \
+		/opt/Qt/5.5/gcc_64/include/QtWidgets/qaction.h \
+		/opt/Qt/5.5/gcc_64/include/QtWidgets/qactiongroup.h \
+		/opt/Qt/5.5/gcc_64/include/QtWidgets/QApplication \
+		/opt/Qt/5.5/gcc_64/include/QtWidgets/qapplication.h \
+		/opt/Qt/5.5/gcc_64/include/QtCore/qcoreapplication.h \
+		/opt/Qt/5.5/gcc_64/include/QtCore/qeventloop.h \
+		/opt/Qt/5.5/gcc_64/include/QtWidgets/qdesktopwidget.h \
+		/opt/Qt/5.5/gcc_64/include/QtGui/qguiapplication.h \
+		/opt/Qt/5.5/gcc_64/include/QtGui/qinputmethod.h \
+		/opt/Qt/5.5/gcc_64/include/QtWidgets/QButtonGroup \
+		/opt/Qt/5.5/gcc_64/include/QtWidgets/qbuttongroup.h \
+		/opt/Qt/5.5/gcc_64/include/QtWidgets/QHeaderView \
+		/opt/Qt/5.5/gcc_64/include/QtWidgets/qheaderview.h \
+		/opt/Qt/5.5/gcc_64/include/QtWidgets/qabstractitemview.h \
+		/opt/Qt/5.5/gcc_64/include/QtWidgets/qabstractscrollarea.h \
+		/opt/Qt/5.5/gcc_64/include/QtWidgets/qframe.h \
+		/opt/Qt/5.5/gcc_64/include/QtCore/qabstractitemmodel.h \
+		/opt/Qt/5.5/gcc_64/include/QtCore/qitemselectionmodel.h \
+		/opt/Qt/5.5/gcc_64/include/QtWidgets/qabstractitemdelegate.h \
+		/opt/Qt/5.5/gcc_64/include/QtWidgets/qstyleoption.h \
+		/opt/Qt/5.5/gcc_64/include/QtWidgets/qabstractspinbox.h \
+		/opt/Qt/5.5/gcc_64/include/QtGui/qvalidator.h \
+		/opt/Qt/5.5/gcc_64/include/QtCore/qregularexpression.h \
+		/opt/Qt/5.5/gcc_64/include/QtWidgets/qslider.h \
+		/opt/Qt/5.5/gcc_64/include/QtWidgets/qabstractslider.h \
+		/opt/Qt/5.5/gcc_64/include/QtWidgets/qstyle.h \
+		/opt/Qt/5.5/gcc_64/include/QtWidgets/qtabbar.h \
+		/opt/Qt/5.5/gcc_64/include/QtWidgets/qrubberband.h \
+		/opt/Qt/5.5/gcc_64/include/QtWidgets/QLabel \
+		/opt/Qt/5.5/gcc_64/include/QtWidgets/qlabel.h \
+		/opt/Qt/5.5/gcc_64/include/QtWidgets/QLineEdit \
+		/opt/Qt/5.5/gcc_64/include/QtWidgets/qlineedit.h \
+		/opt/Qt/5.5/gcc_64/include/QtGui/qtextcursor.h \
+		/opt/Qt/5.5/gcc_64/include/QtGui/qtextformat.h \
+		/opt/Qt/5.5/gcc_64/include/QtGui/qpen.h \
+		/opt/Qt/5.5/gcc_64/include/QtGui/qtextoption.h \
+		/opt/Qt/5.5/gcc_64/include/QtWidgets/QPushButton \
+		/opt/Qt/5.5/gcc_64/include/QtWidgets/qpushbutton.h \
+		/opt/Qt/5.5/gcc_64/include/QtWidgets/qabstractbutton.h \
+		/opt/Qt/5.5/gcc_64/include/QtWidgets/QStatusBar \
+		/opt/Qt/5.5/gcc_64/include/QtWidgets/qstatusbar.h \
+		/opt/Qt/5.5/gcc_64/include/QtWidgets/QTableWidget \
+		/opt/Qt/5.5/gcc_64/include/QtWidgets/qtablewidget.h \
+		/opt/Qt/5.5/gcc_64/include/QtWidgets/qtableview.h \
+		/opt/Qt/5.5/gcc_64/include/QtWidgets/QWidget \
+		/opt/Qt/5.5/gcc_64/include/QtCore/QDebug
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o mainwindow.o ../csunsa/mainwindow.cpp
 
-table.o: ../csunsa/table.cpp ../csunsa/table.h \
-		../csunsa/dllcs.h \
-		../csunsa/nodo.h
+table.o: ../csunsa/table.cpp 
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o table.o ../csunsa/table.cpp
 
-dllcs.o: ../csunsa/dllcs.cpp ../csunsa/dllcs.h \
-		../csunsa/nodo.h
+dllcs.o: ../csunsa/dllcs.cpp 
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o dllcs.o ../csunsa/dllcs.cpp
 
-nodo.o: ../csunsa/nodo.cpp ../csunsa/nodo.h
+nodo.o: ../csunsa/nodo.cpp 
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o nodo.o ../csunsa/nodo.cpp
+
+record.o: ../csunsa/record.cpp ../csunsa/record.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o record.o ../csunsa/record.cpp
 
 moc_mainwindow.o: moc_mainwindow.cpp 
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o moc_mainwindow.o moc_mainwindow.cpp

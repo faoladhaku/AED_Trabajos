@@ -1,3 +1,5 @@
+
+
 #-------------------------------------------------
 #
 # Project created by QtCreator 2015-09-10T10:16:09
@@ -16,9 +18,14 @@ SOURCES += main.cpp\
         mainwindow.cpp \
     table.cpp \
     dllcs.cpp \
-    nodo.cpp
+    nodo.cpp \
+    record.cpp
 
 HEADERS  += mainwindow.h \
     table.h \
     dllcs.h \
-    nodo.h
+    nodo.h \
+    record.h
+
+FORMS += \
+    mainwindow.ui

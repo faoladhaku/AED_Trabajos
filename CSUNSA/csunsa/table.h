@@ -5,23 +5,8 @@
 #include <cstring>
 #include <iostream>
 
-/*void   strcpy(char * p, char *q)
-{
-      while(*p++=*q++);
-}*/
+#include "record.h"
 
-/*int strlen(char * p)
-{
-   register int i =0;
-   for(;*p;p++,i++);
-   return i;
-
-}*/
-struct Record{
-    char key[8];
-    long start;
-    long end;
-};
 
 template<class T>
 class Table{
@@ -32,7 +17,6 @@ class Table{
         Table(char *file);
         void index();
         T GetRecord(char *key);
-        //void printKey();
 };
 
 template<class T>
@@ -42,8 +26,6 @@ Table<T> :: Table(char *file){
 
 template<class T>
 void Table<T> :: index(){
-
-
 
     /** variables para guardar el key y la data temporalmente **/
     char key[10];
@@ -74,12 +56,8 @@ void Table<T> :: index(){
 template<class T>
 T Table<T> :: GetRecord(char* key)
 {
-        cout << "asdaasdasds" << endl;
-
        char data[1000];
        Record *r = m_record.findkey(key, new Record); /** funcion especial que devuelve el puntero de el Record buscado **/
-
-
 
        //std::cout << r->start << std::endl;
 
@@ -90,6 +68,8 @@ T Table<T> :: GetRecord(char* key)
            std::cout<< data << std::endl;
        }
 }
+
+
 
 /*template<class T>
 void Table<T> :: printKey(){
